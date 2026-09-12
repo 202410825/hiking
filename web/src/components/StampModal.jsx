@@ -11,7 +11,6 @@ export default function StampModal({ spot, onClose, onStamp }) {
         <h3>{spot.name}</h3>
         <p>{spot.description}</p>
         <div className="photo-slot">📷 사진을 올려서 인증해보세요</div>
-        <div className="reward-line">🎁 {spot.reward}</div>
         <div className="sheet-actions">
           <button className="btn btn-ghost" onClick={onClose}>
             닫기
