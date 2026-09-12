@@ -9,23 +9,23 @@
   "spots": [
     { "id": 1, "order": 1, "name": "정문 카페거리", "category": "식당 · 카페",
       "description": "수업 끝나고 들르기 좋은 학교 앞 골목. 시험 기간엔 자리 전쟁이 벌어진다.",
-       "icon": "☕", "status": "completed",
+      "reward": "아메리카노 쿠폰", "icon": "☕", "status": "completed",
       "lat": 37.6046, "lng": 126.9534 },
     { "id": 2, "order": 2, "name": "홍제천 산책로", "category": "산책로",
       "description": "후문에서 5분, 냇물을 따라 걷는 코스. 해질 무렵 러닝하기 좋다.",
-     "icon": "🌳", "status": "completed",
+      "reward": "편의점 간식 쿠폰", "icon": "🌳", "status": "completed",
       "lat": 37.5928, "lng": 126.9452 },
     { "id": 3, "order": 3, "name": "청계천", "category": "관광지 · 강추",
       "description": "물소리를 들으며 걷다 보면 도심 한복판이라는 게 믿기지 않는다. 야경은 필수.",
-       "icon": "💧", "status": "current",
+      "reward": "배민 쿠폰 10% 할인", "icon": "💧", "status": "current",
       "lat": 37.5697, "lng": 126.9784 },
     { "id": 4, "order": 4, "name": "경복궁", "category": "관광지",
       "description": "한복 입고 사진 찍기 좋은 곳. 평일 오전이 가장 한산하다.",
-       "icon": "🏯", "status": "locked",
+      "reward": "수뭉이 NFC 키링", "icon": "🏯", "status": "locked",
       "lat": 37.5796, "lng": 126.9770 },
     { "id": 5, "order": 5, "name": "광화문", "category": "관광지",
       "description": "경복궁과 묶어 한 번에 도는 코스의 마무리 스팟.",
-      "icon": "🕯️", "status": "locked",
+      "reward": "책갈피", "icon": "🕯️", "status": "locked",
       "lat": 37.5759, "lng": 126.9769 }
   ]
 }
