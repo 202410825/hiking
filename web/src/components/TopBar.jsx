@@ -18,28 +18,33 @@ export default function TopBar({
   completedSpots,
   onToggleGuide,
 }) {
-  const pct = totalSpots ? Math.round((completedSpots / totalSpots) * 100) : 0;
+  const dots = Array.from({ length: totalSpots }, (_, i) => i < completedSpots);
 
   return (
     <header className="topbar">
-      <div className="header-row">
-        <div>
+      <img className="topbar-hero-img" src="/assets/hero-banner.png" alt="" />
+      <div className="season-card">
+        <div className="season-card-inner">
+          <button className="guide-toggle" onClick={onToggleGuide} aria-label="사용 안내 보기">
+            ?
+          </button>
           <span className="season-eyebrow">{seasonLabel}</span>
-          <span className="header-title">{title}</span>
-          <span className="header-date">{period}</span>
+          <div className="season-title-row">
+            <span className="header-title">{title}</span>
+            <span className="header-date">{period}</span>
+          </div>
         </div>
-        <button className="guide-toggle" onClick={onToggleGuide} aria-label="사용 안내 보기">
-          ?
-        </button>
       </div>
 
-      <div className="progress-bar">
-        <span className="progress-count">
-          {completedSpots}/{totalSpots}
-        </span>
-        <div className="progress-track">
-          <div className="progress-fill" style={{ width: `${pct}%` }} />
+      <div className="progress-pill">
+        <div className="progress-dots">
+          {dots.map((filled, i) => (
+            <span key={i} className={`progress-dot${filled ? " filled" : ""}`} />
+          ))}
         </div>
+        <span className="progress-count">
+          도장 {completedSpots}/{totalSpots}
+        </span>
         <span className="progress-meta">순서 자유</span>
         <span className="progress-dday">{dDay(periodEnd)}</span>
       </div>
