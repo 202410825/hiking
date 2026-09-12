@@ -1,0 +1,742 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>도장판 - Hiking</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Gaegu:wght@300;400;700&display=swap');
+@import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.css');
+
+:root {
+  --paper: #efe6d2;
+  --paper-deep: #e4d8bb;
+  --ink: #2c2620;
+  --ink-soft: #6b6153;
+  --pine: #3a5a40;
+  --pine-deep: #29402d;
+  --pine-light: #8fae82;
+  --stamp: #b83c2b;
+  --stamp-deep: #8f2c1f;
+  --stream: #4f8296;
+  --sun: #e8ac3d;
+  --line: rgba(44, 38, 32, 0.18);
+  --radius-badge: 999px;
+  --shadow-badge: 0 3px 0 rgba(44, 38, 32, 0.25);
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  padding: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: 'Pretendard Variable', 'Pretendard', -apple-system, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+body {
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+}
+
+#app {
+  width: 100%;
+  max-width: 480px;
+  min-height: 100vh;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  background:
+    radial-gradient(circle at 15% 8%, rgba(255,255,255,0.35), transparent 40%),
+    var(--paper);
+}
+
+button {
+  font-family: inherit;
+  cursor: pointer;
+  border: none;
+  background: none;
+  color: inherit;
+}
+
+/* ---------- Top bar ---------- */
+
+.topbar {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 14px 18px 10px;
+  background: linear-gradient(var(--paper) 78%, transparent);
+}
+
+.region-pill {
+  font-family: 'Gaegu', cursive;
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--pine-deep);
+  border: 2px solid var(--pine-deep);
+  border-radius: 999px;
+  padding: 4px 16px 6px;
+  background: var(--paper);
+  transform: rotate(-1deg);
+  line-height: 1.2;
+}
+
+.region-pill .period {
+  display: block;
+  font-family: 'Pretendard Variable', sans-serif;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--ink-soft);
+  letter-spacing: 0.01em;
+}
+
+.guide-toggle {
+  width: 44px;
+  height: 44px;
+  font-size: 26px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: var(--paper-deep);
+  border: 2px solid var(--line);
+  flex-shrink: 0;
+}
+.guide-toggle:active { transform: scale(0.94); }
+
+.guide-banner {
+  margin: 0 18px 6px;
+  padding: 12px 16px;
+  background: #fff;
+  border: 2px dashed var(--pine);
+  border-radius: 16px;
+  font-size: 13.5px;
+  line-height: 1.55;
+  color: var(--pine-deep);
+  position: relative;
+}
+.guide-banner strong {
+  display: block;
+  font-family: 'Gaegu', cursive;
+  font-size: 17px;
+  margin-bottom: 2px;
+  color: var(--pine-deep);
+}
+.guide-banner[hidden] { display: none; }
+
+/* ---------- Views ---------- */
+
+.view { display: none; flex: 1; }
+.view.active { display: block; }
+
+/* ---------- Board (trail) ---------- */
+
+#view-board { padding-bottom: 8px; }
+
+.summit-flag {
+  margin: 18px auto 4px;
+  width: fit-content;
+  text-align: center;
+  font-family: 'Gaegu', cursive;
+  font-size: 15px;
+  color: var(--stamp-deep);
+}
+.summit-flag .flag-icon { font-size: 26px; display: block; }
+
+/* ---------- Board view toggle (trail <-> grid) ---------- */
+
+.view-toggle {
+  display: block;
+  margin: 2px auto 0;
+  font-size: 12px;
+  color: var(--stream);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.trail-wrap.grid-mode #path-svg,
+.trail-wrap.grid-mode .mascot-marker { display: none; }
+
+.trail-wrap.grid-mode .spot-list {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  width: 100%;
+  padding: 14px 6px;
+}
+.trail-wrap.grid-mode .spot-node {
+  width: auto;
+  flex-direction: column;
+  align-self: auto;
+  text-align: center;
+  gap: 6px;
+}
+.trail-wrap.grid-mode .spot-name { font-size: 13.5px; }
+.trail-wrap.grid-mode .spot-category { display: none; }
+
+.trail-wrap {
+  position: relative;
+  padding: 6px 12px 30px;
+}
+
+#path-svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  pointer-events: none;
+}
+#path-svg path {
+  fill: none;
+  stroke: var(--ink-soft);
+  stroke-width: 3;
+  stroke-linecap: round;
+  stroke-dasharray: 2 14;
+  opacity: 0.55;
+}
+
+.spot-list {
+  list-style: none;
+  margin: 0;
+  padding: 10px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 34px;
+  position: relative;
+}
+
+.spot-node {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 78%;
+  position: relative;
+}
+.spot-node.align-left { align-self: flex-start; flex-direction: row; }
+.spot-node.align-right { align-self: flex-end; flex-direction: row-reverse; text-align: right; }
+
+.spot-badge {
+  --rot: 0deg;
+  flex-shrink: 0;
+  width: 64px;
+  height: 64px;
+  border-radius: var(--radius-badge);
+  border: 3px solid var(--ink);
+  font-size: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--paper);
+  transform: rotate(var(--rot));
+  box-shadow: var(--shadow-badge);
+  transition: transform 0.15s ease;
+}
+.spot-node.status-completed .spot-badge {
+  background: var(--pine-light);
+  border-color: var(--pine-deep);
+  color: var(--pine-deep);
+}
+.spot-node.status-current .spot-badge {
+  background: var(--stamp);
+  border-color: var(--stamp-deep);
+  color: #fff9ee;
+  animation: pulse 1.8s ease-in-out infinite;
+}
+.spot-node.status-locked .spot-badge {
+  background: transparent;
+  border-color: var(--line);
+  color: var(--ink-soft);
+  opacity: 0.55;
+  filter: grayscale(1);
+}
+.spot-badge:active { transform: rotate(var(--rot)) scale(0.93); }
+
+@keyframes pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(184,60,43,0.35), var(--shadow-badge); }
+  50% { box-shadow: 0 0 0 8px rgba(184,60,43,0), var(--shadow-badge); }
+}
+
+.spot-info { min-width: 0; }
+.spot-name {
+  display: block;
+  font-family: 'Gaegu', cursive;
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--ink);
+}
+.spot-node.status-locked .spot-name { color: var(--ink-soft); }
+.spot-category {
+  display: block;
+  font-size: 11.5px;
+  color: var(--ink-soft);
+  margin-top: 1px;
+}
+
+.mascot-marker {
+  position: absolute;
+  width: 46px;
+  height: 46px;
+  transform: translate(-50%, -50%);
+  animation: bob 2.2s ease-in-out infinite;
+  z-index: 5;
+  filter: drop-shadow(0 3px 2px rgba(0,0,0,0.2));
+}
+@keyframes bob {
+  0%, 100% { transform: translate(-50%, -50%) translateY(0); }
+  50% { transform: translate(-50%, -50%) translateY(-6px); }
+}
+
+.trail-start {
+  margin: 4px auto 0;
+  width: fit-content;
+  font-size: 12px;
+  color: var(--ink-soft);
+  border-top: 2px dashed var(--line);
+  padding-top: 6px;
+}
+
+/* ---------- Placeholder views ---------- */
+
+.placeholder-view {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  gap: 8px;
+  padding: 80px 30px;
+  color: var(--ink-soft);
+}
+.placeholder-view .big { font-size: 40px; }
+.placeholder-view h2 {
+  font-family: 'Gaegu', cursive;
+  font-size: 20px;
+  color: var(--ink);
+  margin: 0;
+}
+.placeholder-view a { color: var(--stream); text-decoration: underline; }
+
+/* ---------- Modal (인증 / stamp) ---------- */
+
+.modal {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  background: rgba(44,38,32,0.45);
+}
+.modal[hidden] { display: none; }
+.modal-sheet {
+  width: 100%;
+  max-width: 480px;
+  background: var(--paper);
+  border-radius: 26px 26px 0 0;
+  padding: 22px 22px 28px;
+  border-top: 3px solid var(--ink);
+}
+.modal-sheet .sheet-handle {
+  width: 40px; height: 5px;
+  border-radius: 3px;
+  background: var(--line);
+  margin: 0 auto 16px;
+}
+.modal-sheet h3 {
+  font-family: 'Gaegu', cursive;
+  font-size: 22px;
+  margin: 0 0 4px;
+}
+.modal-sheet p { font-size: 13.5px; color: var(--ink-soft); line-height: 1.6; margin: 0 0 16px; }
+.photo-slot {
+  height: 150px;
+  border: 2px dashed var(--pine);
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--pine-deep);
+  font-size: 13px;
+  margin-bottom: 16px;
+  background: #fff;
+}
+.reward-line {
+  font-size: 13px;
+  color: var(--stamp-deep);
+  margin-bottom: 16px;
+}
+.sheet-actions { display: flex; gap: 10px; }
+.btn {
+  flex: 1;
+  padding: 13px;
+  border-radius: 999px;
+  font-weight: 700;
+  font-size: 14.5px;
+  text-align: center;
+}
+.btn-primary { background: var(--stamp); color: #fff9ee; }
+.btn-primary:active { background: var(--stamp-deep); }
+.btn-ghost { background: var(--paper-deep); color: var(--ink); }
+
+/* ---------- Bottom tab bar ---------- */
+
+.tabbar {
+  position: sticky;
+  bottom: 0;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  padding: 10px 6px calc(10px + env(safe-area-inset-bottom));
+  background: var(--paper);
+  border-top: 2px solid var(--line);
+}
+.tab-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  font-size: 10.5px;
+  color: var(--ink-soft);
+  padding: 4px 8px;
+  border-radius: 12px;
+}
+.tab-btn .tab-icon { font-size: 19px; }
+.tab-btn.active { color: var(--pine-deep); font-weight: 700; }
+.tab-btn.tab-camera .tab-icon {
+  width: 46px;
+  height: 46px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: var(--stamp);
+  color: #fff9ee;
+  font-size: 21px;
+  margin-top: -22px;
+  border: 3px solid var(--paper);
+  box-shadow: 0 2px 0 rgba(0,0,0,0.15);
+}
+.tab-btn.tab-camera { color: var(--stamp-deep); }
+
+@media (min-width: 481px) {
+  #app { box-shadow: 0 0 0 1px var(--line); min-height: 100vh; }
+}
+</style>
+</head>
+<body>
+<div id="app">
+
+  <header class="topbar">
+    <div class="region-pill">
+      <span id="region-name">구기동</span>
+      <span class="period" id="region-period">-</span>
+    </div>
+    <button class="guide-toggle" id="guide-toggle" aria-label="사용 안내 보기">🦌</button>
+  </header>
+
+  <div class="guide-banner" id="guide-banner" hidden>
+    <strong id="guide-title">도장판 이용법</strong>
+    <span id="guide-message"></span>
+  </div>
+
+  <!-- 도장판 (Stamp board / trail) : bottom-nav "도감" tab -->
+  <main class="view active" id="view-board">
+    <div class="summit-flag">
+      <span class="flag-icon">🚩</span>
+      전부 모으면 <span id="finish-reward-label">히든 리워드</span> 획득!
+    </div>
+    <button class="view-toggle" id="view-toggle">모아보기</button>
+    <div class="trail-wrap" id="trail-wrap">
+      <svg id="path-svg"></svg>
+      <ol class="spot-list" id="spot-list"></ol>
+      <div class="mascot-marker" id="mascot-marker" hidden>
+        <svg viewBox="0 0 64 64" width="46" height="46">
+          <ellipse cx="32" cy="40" rx="16" ry="18" fill="#e8ac3d" stroke="#2c2620" stroke-width="2.5"/>
+          <path d="M20 20 Q14 4 22 8 Q22 18 24 22" fill="#e8ac3d" stroke="#2c2620" stroke-width="2.5" stroke-linejoin="round"/>
+          <path d="M44 20 Q50 4 42 8 Q42 18 40 22" fill="#e8ac3d" stroke="#2c2620" stroke-width="2.5" stroke-linejoin="round"/>
+          <circle cx="26" cy="34" r="2.4" fill="#2c2620"/>
+          <circle cx="38" cy="34" r="2.4" fill="#2c2620"/>
+          <path d="M25 41 Q32 47 39 41" fill="none" stroke="#2c2620" stroke-width="2.5" stroke-linecap="round"/>
+        </svg>
+      </div>
+    </div>
+    <div class="trail-start" style="margin-left:14px;">출발 지점</div>
+  </main>
+
+  <!-- 지도 placeholder -->
+  <main class="view" id="view-map">
+    <div class="placeholder-view">
+      <span class="big">🗺️</span>
+      <h2>지도 화면 준비 중</h2>
+      <p>스팟 위치를 지도에서 한눈에 보여줄 예정이에요.</p>
+    </div>
+  </main>
+
+  <!-- 커뮤니티 placeholder -->
+  <main class="view" id="view-community">
+    <div class="placeholder-view">
+      <span class="big">💬</span>
+      <h2>커뮤니티 준비 중</h2>
+      <p>스팟별 리뷰와 사진을 나눌 수 있는 공간이 열려요.</p>
+    </div>
+  </main>
+
+  <!-- 설정 placeholder -->
+  <main class="view" id="view-settings">
+    <div class="placeholder-view">
+      <span class="big">⚙️</span>
+      <h2>설정</h2>
+      <p><a href="#" id="privacy-link">개인정보 처리방침</a></p>
+    </div>
+  </main>
+
+  <!-- 인증(스탬프) 모달 -->
+  <div class="modal" id="spot-modal" hidden>
+    <div class="modal-sheet">
+      <div class="sheet-handle"></div>
+      <h3 id="modal-name">스팟 이름</h3>
+      <p id="modal-desc">스팟 설명</p>
+      <div class="photo-slot">📷 사진을 올려서 인증해보세요</div>
+      <div class="reward-line">🎁 <span id="modal-reward">리워드</span></div>
+      <div class="sheet-actions">
+        <button class="btn btn-ghost" id="modal-close">닫기</button>
+        <button class="btn btn-primary" id="modal-stamp">도장 찍기</button>
+      </div>
+    </div>
+  </div>
+
+  <nav class="tabbar">
+    <button class="tab-btn" data-view="map">
+      <span class="tab-icon">🗺️</span>지도
+    </button>
+    <button class="tab-btn active" data-view="board">
+      <span class="tab-icon">📖</span>도감
+    </button>
+    <button class="tab-btn tab-camera" id="tab-camera">
+      <span class="tab-icon">📷</span>인증
+    </button>
+    <button class="tab-btn" data-view="community">
+      <span class="tab-icon">💬</span>커뮤니티
+    </button>
+    <button class="tab-btn" data-view="settings">
+      <span class="tab-icon">⚙️</span>설정
+    </button>
+  </nav>
+
+</div>
+
+<script>
+/* =====================================================================
+   여기 DATA 객체만 고치면 지역/기간/스팟/리워드 내용이 다 바뀝니다.
+   (status: "completed" | "current" | "locked", order는 1부터 순서대로)
+   ===================================================================== */
+const DATA = {
+  region: "구기동",
+  period: "2026.03.01 ~ 2026.06.30",
+  guide: {
+    title: "도장판 이용법",
+    message: "스팟에 도착하면 카메라 버튼으로 인증하고 도장을 모아보세요. 5개를 다 모으면 히든 리워드가 열려요."
+  },
+  finishReward: "수뭉이 한정판 배지",
+  spots: [
+    { id: 1, order: 1, name: "정문 카페거리", category: "식당 · 카페",
+      description: "수업 끝나고 들르기 좋은 학교 앞 골목. 시험 기간엔 자리 전쟁이 벌어진다.",
+      reward: "아메리카노 쿠폰", icon: "☕", status: "completed" },
+    { id: 2, order: 2, name: "홍제천 산책로", category: "산책로",
+      description: "후문에서 5분, 냇물을 따라 걷는 코스. 해질 무렵 러닝하기 좋다.",
+      reward: "편의점 간식 쿠폰", icon: "🌳", status: "completed" },
+    { id: 3, order: 3, name: "청계천", category: "관광지 · 강추",
+      description: "물소리를 들으며 걷다 보면 도심 한복판이라는 게 믿기지 않는다. 야경은 필수.",
+      reward: "배민 쿠폰 10% 할인", icon: "💧", status: "current" },
+    { id: 4, order: 4, name: "경복궁", category: "관광지",
+      description: "한복 입고 사진 찍기 좋은 곳. 평일 오전이 가장 한산하다.",
+      reward: "수뭉이 NFC 키링", icon: "🏯", status: "locked" },
+    { id: 5, order: 5, name: "광화문", category: "관광지",
+      description: "경복궁과 묶어 한 번에 도는 코스의 마무리 스팟.",
+      reward: "책갈피", icon: "🕯️", status: "locked" }
+  ]
+};
+
+const STORAGE_KEY = "hiking-stamp-state-v1";
+let state = null;
+
+function loadData() {
+  const saved = localStorage.getItem(STORAGE_KEY);
+  if (saved) {
+    try { return JSON.parse(saved); } catch (e) { /* fall through */ }
+  }
+  return JSON.parse(JSON.stringify(DATA));
+}
+
+function saveData() {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+}
+
+function renderHeader() {
+  document.getElementById("region-name").textContent = state.region;
+  document.getElementById("region-period").textContent = state.period;
+  document.getElementById("guide-title").textContent = state.guide.title;
+  document.getElementById("guide-message").textContent = state.guide.message;
+  document.getElementById("finish-reward-label").textContent = state.finishReward;
+}
+
+function renderTrail() {
+  const list = document.getElementById("spot-list");
+  list.innerHTML = "";
+
+  const ordered = [...state.spots].sort((a, b) => a.order - b.order).reverse();
+
+  ordered.forEach((spot) => {
+    const li = document.createElement("li");
+    li.className = `spot-node status-${spot.status} align-${spot.order % 2 === 0 ? "right" : "left"}`;
+    li.dataset.id = spot.id;
+
+    const rot = (spot.id % 2 === 0 ? -1 : 1) * (3 + (spot.id % 3) * 2);
+
+    li.innerHTML = `
+      <button class="spot-badge" style="--rot:${rot}deg" aria-label="${spot.name}">${spot.icon}</button>
+      <div class="spot-info">
+        <span class="spot-name">${spot.name}</span>
+        <span class="spot-category">${spot.category}</span>
+      </div>
+    `;
+    li.querySelector(".spot-badge").addEventListener("click", () => openModal(spot.id));
+    list.appendChild(li);
+  });
+
+  drawPathAndMascot();
+}
+
+function drawPathAndMascot() {
+  const wrap = document.getElementById("trail-wrap");
+  const svg = document.getElementById("path-svg");
+  const badges = [...document.querySelectorAll(".spot-badge")];
+  if (!badges.length || wrap.classList.contains("grid-mode")) {
+    svg.innerHTML = "";
+    return;
+  }
+
+  const wrapRect = wrap.getBoundingClientRect();
+  const points = badges.map(b => {
+    const r = b.getBoundingClientRect();
+    return {
+      x: r.left + r.width / 2 - wrapRect.left,
+      y: r.top + r.height / 2 - wrapRect.top,
+    };
+  });
+
+  let d = `M ${points[0].x} ${points[0].y}`;
+  for (let i = 1; i < points.length; i++) {
+    const prev = points[i - 1];
+    const cur = points[i];
+    const midY = (prev.y + cur.y) / 2;
+    d += ` C ${prev.x} ${midY}, ${cur.x} ${midY}, ${cur.x} ${cur.y}`;
+  }
+  svg.innerHTML = `<path d="${d}"></path>`;
+
+  const marker = document.getElementById("mascot-marker");
+  const currentSpot = state.spots.find(s => s.status === "current");
+  if (!currentSpot) { marker.hidden = true; return; }
+
+  const badgeEl = document.querySelector(`.spot-node[data-id="${currentSpot.id}"] .spot-badge`);
+  if (!badgeEl) { marker.hidden = true; return; }
+  const r = badgeEl.getBoundingClientRect();
+  marker.style.left = `${r.left + r.width / 2 - wrapRect.left + 46}px`;
+  marker.style.top = `${r.top + r.height / 2 - wrapRect.top}px`;
+  marker.hidden = false;
+}
+
+function openModal(id) {
+  const spot = state.spots.find(s => s.id === id);
+  if (!spot) return;
+  document.getElementById("modal-name").textContent = spot.name;
+  document.getElementById("modal-desc").textContent = spot.description;
+  document.getElementById("modal-reward").textContent = spot.reward;
+
+  const stampBtn = document.getElementById("modal-stamp");
+  stampBtn.disabled = spot.status === "locked";
+  stampBtn.textContent = spot.status === "completed" ? "이미 도장 완료" : "도장 찍기";
+  stampBtn.style.opacity = spot.status === "current" ? "1" : "0.5";
+  stampBtn.onclick = () => {
+    if (spot.status !== "current") return;
+    completeSpot(spot.id);
+    closeModal();
+  };
+
+  document.getElementById("spot-modal").hidden = false;
+}
+
+function closeModal() {
+  document.getElementById("spot-modal").hidden = true;
+}
+
+function completeSpot(id) {
+  const idx = state.spots.findIndex(s => s.id === id);
+  state.spots[idx].status = "completed";
+  const next = state.spots.find(s => s.order === state.spots[idx].order + 1);
+  if (next) next.status = "current";
+  saveData();
+  renderTrail();
+}
+
+function showView(name) {
+  document.querySelectorAll(".view").forEach(v => v.classList.remove("active"));
+  document.getElementById(`view-${name}`).classList.add("active");
+  document.querySelectorAll(".tab-btn[data-view]").forEach(btn => {
+    btn.classList.toggle("active", btn.dataset.view === name);
+  });
+  if (name === "board") requestAnimationFrame(drawPathAndMascot);
+}
+
+function wireUp() {
+  document.querySelectorAll(".tab-btn[data-view]").forEach(btn => {
+    btn.addEventListener("click", () => showView(btn.dataset.view));
+  });
+
+  document.getElementById("tab-camera").addEventListener("click", () => {
+    const current = state.spots.find(s => s.status === "current");
+    if (current) openModal(current.id);
+  });
+
+  document.getElementById("guide-toggle").addEventListener("click", () => {
+    const banner = document.getElementById("guide-banner");
+    banner.hidden = !banner.hidden;
+  });
+
+  document.getElementById("modal-close").addEventListener("click", closeModal);
+  document.getElementById("spot-modal").addEventListener("click", e => {
+    if (e.target.id === "spot-modal") closeModal();
+  });
+
+  document.getElementById("view-toggle").addEventListener("click", () => {
+    const wrap = document.getElementById("trail-wrap");
+    const nowGrid = wrap.classList.toggle("grid-mode");
+    document.getElementById("view-toggle").textContent = nowGrid ? "산길로 보기" : "모아보기";
+    drawPathAndMascot();
+  });
+
+  window.addEventListener("resize", () => {
+    clearTimeout(window.__pathResizeT);
+    window.__pathResizeT = setTimeout(drawPathAndMascot, 120);
+  });
+}
+
+(function init() {
+  state = loadData();
+  renderHeader();
+  renderTrail();
+  wireUp();
+})();
+</script>
+</body>
+</html>
