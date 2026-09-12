@@ -1,9 +1,9 @@
 const TABS = [
-  { key: "map", icon: "🗺️", label: "지도" },
-  { key: "board", icon: "📖", label: "도장판" },
-  { key: "stamp", icon: "📷", label: "인증" },
-  { key: "community", icon: "💬", label: "커뮤니티" },
-  { key: "settings", icon: "⚙️", label: "설정" },
+  { key: "map", icon: "/assets/icons/nav-map.png", label: "지도" },
+  { key: "board", icon: "/assets/icons/nav-board.png", label: "도장판" },
+  { key: "stamp", icon: "/assets/icons/nav-cert.png", label: "인증" },
+  { key: "community", icon: "/assets/icons/nav-community.png", label: "커뮤니티" },
+  { key: "settings", icon: "/assets/icons/nav-settings.png", label: "설정" },
 ];
 
 export default function BottomNav({ activeView, onChangeView, onCamera }) {
@@ -24,7 +24,7 @@ export default function BottomNav({ activeView, onChangeView, onCamera }) {
             className={`tab-btn${activeView === tab.key ? " active" : ""}`}
             onClick={() => handleClick(tab.key)}
           >
-            <span className="tab-icon">{tab.icon}</span>
+            <img className="tab-icon-img" src={tab.icon} alt="" />
             {tab.label}
           </button>
         ))}
