@@ -1,4 +1,4 @@
-const STORAGE_KEY = "hiking-stamp-state-v1";
+const STORAGE_KEY = "hiking-stamp-state-v2";
 
 export function loadState(defaultData) {
   const saved = localStorage.getItem(STORAGE_KEY);
