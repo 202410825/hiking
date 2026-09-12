@@ -118,3 +118,31 @@ cd hiking
 ---
 
 *Last Updated: 2026-09-12*
+
+---
+
+# 배포 안내
+
+## 1. 깃허브에 올리기
+이 폴더 안의 두 개를 그대로 `202410825/hiking` 레포 루트에 넣고 커밋/푸시하세요.
+
+```
+hiking/
+├── frontend/
+│   └── index.html   ← 프로토타입 본체
+├── vercel.json       ← Vercel 라우팅 설정
+└── (기존 docs/, backend/, mobile/, database/ 등은 그대로 둬도 됨)
+```
+
+## 2. Vercel에 연결
+1. https://vercel.com 에서 깃허브 계정으로 로그인
+2. "Add New… → Project" → `202410825/hiking` 레포 선택
+3. Framework Preset은 "Other"로 두면 됨 (별도 빌드 없음)
+4. 그대로 Deploy 클릭
+
+`vercel.json`이 `frontend/index.html`을 루트 경로로 서빙하도록 지정해뒀기 때문에,
+Vercel 프로젝트 설정에서 Root Directory를 따로 안 건드려도 배포된 도메인에 바로 접속하면 프로토타입이 뜹니다.
+
+## 3. 이후 UI 수정
+- 수정은 `frontend/index.html` 파일 하나만 고치면 됩니다 (빌드 단계 없음, CDN으로 React를 바로 불러오는 방식).
+- 수정 후 깃허브에 다시 푸시하면 Vercel이 자동으로 재배포합니다.
